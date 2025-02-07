@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "prompt-sync": "^4.2.0",
-    "word-list-json": "^0.2.0"
-  }
-}
