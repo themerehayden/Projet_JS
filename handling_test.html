@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #baloon {
+            font-size : 100px;
+        }
+    </style>
+</head>
+<body>
+<p id="baloon">🎈</p>
+
+<script>
+    window.addEventListener("keydown", event => {
+    if (event.key == "ArrowUp") {
+        var el = document.getElementById('baloon');
+        var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+        var fontSize = parseFloat(style); 
+        el.style.fontSize  = (fontSize + 10) + "px";
+        console.log(window.getComputedStyle(el, null).getPropertyValue('font-size'));
+        window.addEventListener("keydown", function(e) {
+        if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+            e.preventDefault();
+        }
+        }, false);  
+    }
+    });
+    window.addEventListener("keydown", event => {
+    if (event.key == "ArrowDown") {
+        var el = document.getElementById('baloon');
+        var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+        var fontSize = parseFloat(style); 
+        el.style.fontSize  = (fontSize - 10) + "px";
+        console.log(window.getComputedStyle(el, null).getPropertyValue('font-size'));
+        window.addEventListener("keydown", function(e) {
+        if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+            e.preventDefault();
+        }
+        }, false);  
+    }
+    });
+</script>
+</body>
+</html>
