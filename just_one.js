@@ -14,7 +14,8 @@ const words = [
     "child", "person" // Add more if needed
 ];
 
-const wordFamilies = {
+// Définit des familles de mots pour gérer les variations
+const wordFamilies = {  
     prince: ['princess'],
     man: ['woman', 'men'],
     child: ['children'],
@@ -24,7 +25,7 @@ const wordFamilies = {
     // Add more word families as needed...
 };
 
-// Readline setup
+// Initialise readline pour permettre les interactions avec l'utilisateur dans le terminal.
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -33,12 +34,12 @@ const rl = readline.createInterface({
 // Game state
 let numPlayers = 0;
 let currentRound = 1;
-let currentGuesserIndex = 0;
+let currentGuesserIndex = 0; // Indice du joueur qui devine.
 let scores = [];
-let shuffledWords = [];
+let shuffledWords = []; // Mots mélangés pour chaque partie.
 
 
-// Shuffle function
+// Mélange aléatoirement un tableau. di tung vi tri i roi tim vi tri j bat ky moi roi dao phan tu cho nhau
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -47,38 +48,46 @@ function shuffleArray(array) {
 }
 
 // Normalize text (removes accents and makes lowercase)
+// Met le texte en minuscules et supprime les accents pour éviter les erreurs dues aux variantes d'écriture.
 function normalizeText(text) {
-    if (!text) return "";
-    return text.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (!text) return ""; 
+    return text.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // applies Unicode Normalization Form D (NFD), which decomposes characters into their base characters and diacritical marks. For example, the character é would be decomposed into e followed by an accent mark.
 }
+
+/* For the input text "école":
+
+After .toLowerCase(), it becomes "école".
+After .normalize("NFD"), it becomes "école" (where the accent is a separate character).
+After .replace(/[\u0300-\u036f]/g, ""), it becomes "ecole", removing the accent.
+*/
 
 // Get the base form of a word (handles plurals and word families)
 function getBaseForm(word) {
     const lowerWord = normalizeText(word);
-    for (const [root, variants] of Object.entries(wordFamilies)) {
+    for (const [root, variants] of Object.entries(wordFamilies)) { // root, variants sont comme des clefs et valeurs dans une dict
         if (lowerWord === root || variants.includes(lowerWord)) {
             return root;
         }
     }
-    return lowerWord.endsWith('s') && lowerWord.length > 3 ? lowerWord.slice(0, -1) : lowerWord;
+    return lowerWord.endsWith('s') && lowerWord.length > 3 ? lowerWord.slice(0, -1) : lowerWord; // slice: prendre d'indice 0 jusqu'a avant la fin dans le cas de 's' sinon garder le mot
 }
 
 // Remove duplicate or invalid clues
 function removeDuplicateClues(clues, chosenWord) {
     const normalizedChosenWord = getBaseForm(chosenWord);
-    const clueCounts = {};
-    const uniqueClues = [];
+    const clueCounts = {}; // an object that will track how many times each base form of the clues appears.
+    const uniqueClues = []; // an array that will hold the final list of clues that are unique and valid.
 
     clues.forEach((clue) => {
         const baseForm = getBaseForm(clue);
         
-        // ❌ Remove clues that match the chosen word
+        // Remove clues that match the chosen word
         if (baseForm === normalizedChosenWord) {
             console.log(`❌ Clue "${clue}" is the same as the chosen word and is removed.`);
             return;
         }
 
-        clueCounts[baseForm] = (clueCounts[baseForm] || 0) + 1;
+        clueCounts[baseForm] = (clueCounts[baseForm] || 0) + 1; // verifier si une indice apparait plus de une fois, si 1er fois -> 0 sinon ...
     });
 
     clues.forEach((clue) => {
@@ -119,7 +128,7 @@ function saveGameTurn(turnData, callback) {
 function startGame() {
 
     rl.question("Enter the number of players: ", (numPlayersInput) => {
-        numPlayers = parseInt(numPlayersInput);
+        numPlayers = parseInt(numPlayersInput); // convertir en int
         if (numPlayers < 2) {
             console.log("There must be at least 2 players.");
             rl.close();
@@ -128,7 +137,7 @@ function startGame() {
 
         scores = Array(numPlayers).fill(0);
         shuffleArray(words);
-        shuffledWords = words.slice(0, numPlayers * 3);
+        shuffledWords = words.slice(0, numPlayers);
 
         playRound();
     });
@@ -136,7 +145,7 @@ function startGame() {
 
 // Play a round
 function playRound() {
-    if (currentRound > 4) {
+    if (currentRound > 13*numPlayers) {
         endGame();
         return;
     }
@@ -145,8 +154,8 @@ function playRound() {
     const guesser = currentGuesserIndex + 1;
     console.log(`\n🎭 Player ${guesser} is the guesser this round!`);
 
-    shuffleArray(shuffledWords);
-    const chosenCards = shuffledWords.slice(0, numPlayers);
+    // shuffleArray(shuffledWords);
+    // const chosenCards = shuffledWords.slice(0, numPlayers);
 
     console.log(`\nHere are ${numPlayers} cards numbered from 1 to ${numPlayers}:`);
     for (let i = 0; i < numPlayers; i++) {
@@ -161,9 +170,9 @@ function playRound() {
             return playRound();
         }
 
-        const chosenWord = chosenCards[chosenIndex];
+        const chosenWord = shuffledWords[chosenIndex];
         console.log(`\n🔹 Player ${guesser} chose card number ${chosenIndex + 1}.`);
-        console.log(`\n❗ The word on this card is: " + chosenWord + " (Hidden for Player ${guesser}. Only other players can see this!) ❗`);
+        console.log(`\n❗ The word on this card is: ${chosenWord} (Hidden for Player ${guesser}. Only other players can see this!) ❗`);
 
         let clues = [];
         let playerCount = 0;

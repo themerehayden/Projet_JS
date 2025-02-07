@@ -32,7 +32,7 @@ Just One est un jeu de devinettes en ligne de commande inspiré du jeu de socié
 
 ## 🎮 Règles du Jeu
 
-1. **Configuration** : Entrez le nombre de joueurs (minimum 2).
+1. **Configuration** : Entrez le nombre de joueurs (minimum 3).
 2. **Sélection du mot** : Un mot est choisi aléatoirement pour le tour.
 3. **Donner des indices** : Tous les joueurs, sauf celui qui devine, écrivent un indice.
 4. **Suppression des doublons** : Les indices en double ou trop similaires sont supprimés.
@@ -52,8 +52,8 @@ Projet_JS/
 ## ✨ Améliorations Futures
 
 - Intégrer un mode multijoueur en ligne.
-- Ajouter des catégories de mots.
-
+- Ajouter des catégories de mots et ensemble des mots.
+- Il y a des mots qui valident les conditions de la fonction getBaseForm (ex. mess, chess, boss, etc) mais ne sont pas des mots pluriels.
 ---
 
 🎉 Amusez-vous bien en jouant à Just One !
