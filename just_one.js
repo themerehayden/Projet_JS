@@ -1,4 +1,5 @@
-const fs = require('fs');  // fs: Module pour manipuler les fichiers (permet d'écrire/lire un journal des parties).
+// Utiliser des promesses chaque fois qu'on traite des operations asynchrones: des tâches qui prennent du temps et ne se terminent pas immédiatement
+const fs = require('fs').promises;  // fs: Module pour manipuler les fichiers (permet d'écrire/lire un journal des parties).
 const readline = require('readline'); // readline: Module pour interagir avec l'utilisateur via le terminal.
 
 const words = [
@@ -103,30 +104,30 @@ function removeDuplicateClues(clues, chosenWord) {
 }
 
 // Function to save game turn to log
-function saveGameTurn(turnData, callback) {
-    fs.readFile('game_log.json', (err, data) => {
-        let gameLog = [];
+function saveGameTurn(turnData) {
+    return fs.readFile('game_log.json', 'utf8')
+        .then((data) => {
+            let gameLog = [];
 
-        if (!err && data.length > 0) {
-            gameLog = JSON.parse(data);
-        }
-
-        gameLog.push(turnData);
-
-        fs.writeFile('game_log.json', JSON.stringify(gameLog, null, 2), (err) => {
-            if (err) {
-                console.log('Error saving game log:', err);
-            } else {
-                console.log('Game turn saved to game_log.json');
-                if (callback) callback(); // Call the next step after saving
+            if (data.length > 0) {
+                gameLog = JSON.parse(data);
             }
+
+            gameLog.push(turnData);
+
+            return fs.writeFile('game_log.json', JSON.stringify(gameLog, null, 2));
+        })
+        .then(() => {
+            console.log('Game turn saved to game_log.json');
+        })
+        .catch((err) => {
+            console.error('Error saving game log:', err);
+            throw err; // Propagate error to be handled by caller
         });
-    });
 }
 
 // Start the game
 function startGame() {
-
     rl.question("Enter the number of players: ", (numPlayersInput) => {
         numPlayers = parseInt(numPlayersInput); // convertir en int
         if (numPlayers < 2) {
@@ -163,33 +164,33 @@ function playRound() {
     }
 
     rl.question(`Player ${guesser}, choose a card (1-${numPlayers}): `, (chosenIndex) => {
-        chosenIndex = parseInt(chosenIndex) - 1;
+        chosenIndex = parseInt(chosenIndex) - 1; // The input is converted from a 1-based index (player sees 1, 2, 3...) to a 0-based index (program uses 0, 1, 2...).
 
         if (isNaN(chosenIndex) || chosenIndex < 0 || chosenIndex >= numPlayers) {
             console.log("Invalid choice. Please pick a valid number.");
             return playRound();
         }
 
-        const chosenWord = shuffledWords[chosenIndex];
+        const chosenWord = shuffledWords[chosenIndex];  // The word corresponding to the chosen card is selected from shuffledWords.
         console.log(`\n🔹 Player ${guesser} chose card number ${chosenIndex + 1}.`);
         console.log(`\n❗ The word on this card is: ${chosenWord} (Hidden for Player ${guesser}. Only other players can see this!) ❗`);
 
-        let clues = [];
-        let playerCount = 0;
+        let clues = [];  // store the clues given by players
+        let playerCount = 0; // keeps track of how many players have given a clue.
         
-        // Collecting clues 
+        // Fucntion recursively collects clues from all players except the guesser.
         function getClues() {
-            if (playerCount < numPlayers - 1) {
-                const clueGiver = (currentGuesserIndex + 1 + playerCount) % numPlayers + 1;
+            if (playerCount < numPlayers - 1) { // One player is the guesser, so the remaining numPlayers - 1 players must provide clues.
+                const clueGiver = (currentGuesserIndex + 1 + playerCount) % numPlayers + 1; // ensures that each player (except the guesser) gives exactly one clue.
                 rl.question(`Player ${clueGiver}, enter your clue: `, (clue) => {
                     clues.push(clue);
                     playerCount++;
                     getClues();
                 });
-            } else {
+            } else { // once all the clues are collected 
                 clues = removeDuplicateClues(clues, chosenWord);
                 console.log("\n✅ Clues collected: " + clues.join(", "));
-                askForGuess(chosenWord, clues);
+                askForGuess(chosenWord, clues); // move on to the guessing phase with the cl
             }
         }
 
@@ -224,11 +225,11 @@ function askForGuess(wordToGuess, clues) {
         console.log(result === 'correct' ? "\n🎉 Correct! Well done!\n" : `\n❌ Wrong! The correct word was "${wordToGuess}".\n`);
 
         // Save game turn and then move to the next round
-        saveGameTurn(turnData, () => {
+        saveGameTurn(turnData).then(() => {
             currentGuesserIndex = (currentGuesserIndex + 1) % numPlayers;
             currentRound++;
             playRound();
-        });
+        });     
     });
 }
 

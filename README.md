@@ -26,6 +26,13 @@ Just One est un jeu de devinettes en ligne de commande inspiré du jeu de socié
    npm install
    ```
 3. Exécutez le jeu :
+
+   ```sh
+   npm start
+   ```
+
+   ou:
+
    ```sh
    node just_one.js
    ```
@@ -54,6 +61,7 @@ Projet_JS/
 - Intégrer un mode multijoueur en ligne.
 - Ajouter des catégories de mots et ensemble des mots.
 - Il y a des mots qui valident les conditions de la fonction getBaseForm (ex. mess, chess, boss, etc) mais ne sont pas des mots pluriels.
+
 ---
 
 🎉 Amusez-vous bien en jouant à Just One !
